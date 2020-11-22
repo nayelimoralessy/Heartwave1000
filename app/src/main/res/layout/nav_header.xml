@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="165dp"
+    android:background="@color/colorAccent"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+    <TextView
+        android:layout_width="260dp"
+        android:layout_height="55dp"
+        android:baselineAligned="false"
+        android:text="HeartWave"
+        android:textAppearance="@style/Title"
+        android:textSize="50dp"
+        android:textAlignment="center"
+        android:gravity="center"/>
+
+    <ImageView
+        android:layout_width="260dp"
+        android:layout_height="75dp"
+        android:contentDescription="@string/content_description_1"
+        android:src="@drawable/signal"/>
+</LinearLayout>

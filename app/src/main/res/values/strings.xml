@@ -1,0 +1,19 @@
+<resources>
+
+    <string name="app_name">Heartwave</string>
+    <string name="item_scan">Scan</string>
+    <string name="item_ecg">ECG</string>
+    <string name="item_stats">Stats</string>
+    <string name="content_description_1">Image: launcher round</string>
+    <string name="text_nav_header_1">Coding in Flow</string>
+    <string name="text_nav_header_2">info@codinginflow.com</string>
+    <string name="text_fragment_scan_1">Device Connect</string>
+    <string name="text_fragment_ecg_1">ECG Real-Time Signal</string>
+    <string name="text_fragment_stats_1">Records</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="button_scan">scan</string>
+    <string name="button_connect">connect</string>
+    <string name="button_disconnect">disconnect</string>
+
+</resources>

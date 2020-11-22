@@ -1,0 +1,29 @@
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#000000</item>
+        <item name="colorPrimaryDark">#000000</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    <style name="SPLASH" parent = "@android:style/TextAppearance">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">45dp</item>
+        <item name= "android:textStyle">bold</item>
+        <item name="android:textColor">@color/title_color</item>
+        <item name="android:fontFamily">cursive</item>
+    </style>
+    <style name="Title" parent = "@android:style/TextAppearance">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">55dp</item>
+        <item name= "android:textStyle">bold</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:fontFamily">cursive</item>
+    </style>
+    <style name="toolbarTitle" parent = "@android:style/TextAppearance">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">35dp</item>
+        <item name= "android:textStyle">bold</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:fontFamily">cursive</item>
+    </style>
+</resources>
