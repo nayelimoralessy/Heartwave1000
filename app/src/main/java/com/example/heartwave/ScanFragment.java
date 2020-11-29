@@ -47,7 +47,7 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
         Button connectButton = view.findViewById(R.id.button_connect);
         Button disconnectButton = view.findViewById(R.id.button_disconnect);
         listView = view.findViewById(R.id.list_view);
-        arrayList = new ArrayList<String>();
+//        arrayList = new ArrayList<String>();
         arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
         listView.setAdapter(arrayAdapter);
         arrayDevices = new ArrayList<>();
@@ -99,7 +99,6 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDetach() {
         super.onDetach();
-
         mMessageSenderCallback = null;
         requireActivity().unregisterReceiver(receiver);
     }

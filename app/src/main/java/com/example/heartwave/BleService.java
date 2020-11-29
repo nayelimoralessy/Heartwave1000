@@ -161,10 +161,6 @@ public class BleService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
-
-//            UUID SERVICE_UUID = UUID.fromString("49535343-FE7D-4AE5-8FA9-9FAFD205E455");
-//            UUID CHARACTERISTIC_UUID = UUID.fromString("49535343-1E4D-4BD9-BA61-23C647249616");
-//            UUID DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
             UUID SERVICE_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
             UUID CHARACTERISTIC_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
             UUID DESCRIPTOR_UUID = UUID.fromString("00002901-0000-1000-8000-00805F9B34FB");
@@ -174,12 +170,6 @@ public class BleService extends Service {
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(CHARACTERISTIC_UUID);
                 gatt.setCharacteristicNotification(characteristic, true);
                 BluetoothGattDescriptor descriptor = characteristic.getDescriptor(DESCRIPTOR_UUID);
-//                New
-//                UUID DESCRIPTOR_UUID_2 = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
-//                BluetoothGattDescriptor descriptor2 = characteristic.getDescriptor(DESCRIPTOR_UUID_2);
-//                descriptor2.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-//                gatt.writeDescriptor(descriptor2);
-//                End
                 descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                 gatt.writeDescriptor(descriptor);
             }
@@ -191,25 +181,6 @@ public class BleService extends Service {
 
             byte[] buffer = characteristic.getValue();
 
-//            byte register = buffer[0];
-//            byte bit7 = (byte) ((register >> 7) & 0x01);
-//            if(bit7 == 0x00) {
-//                /*  Low Byte   */
-//                lowByte = (byte) (register & 0x7F);
-//            }
-//            else {
-//                /*  High Byte    */
-//                lowByte |= (register & 0x01);
-//                highByte = (byte) ((register >> 1) & 0x03);
-//                levelADC = ((highByte & 0xFF) << 8) | (lowByte & 0xFF);
-//                voltageADC = levelADC * 3.3 / 1023;
-//                String msg = String.valueOf(voltageADC);
-//                sendBroadcast(msg, ACTION_SEND_DATA);
-//                Log.d("Tag", msg);
-//            }
-//            levelADC = ((buffer[0] & 0xff) << 8) | (buffer[1] & 0xff);
-//            voltageADC = levelADC * 5.0 / 1023;
-//            String msg = String.valueOf(voltageADC);
             String msg = new String(buffer);
             msg = msg.replaceAll("\\r\\n", "");
             if(isNumeric(msg)) {

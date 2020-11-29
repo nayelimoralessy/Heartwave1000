@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -20,24 +22,35 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
 
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ScanFragment.MessageSender {
     private DrawerLayout drawer;
     BleService bleService;
     Boolean boundService;
+    Fragment fragment ;
+    ArrayList a;
+    ArrayAdapter aad;
+    ListView records;
+    DatabaseHelper dbh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         drawer = findViewById(R.id.drawer_layout);
+
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
@@ -46,8 +59,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         if(savedInstanceState == null) {
+            fragment =  new ScanFragment();
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                    new ScanFragment()).commit();
+                   fragment).commit();
             navigationView.setCheckedItem(R.id.nav_scan);
         }
         askPermission();
@@ -69,18 +83,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.nav_scan:
+                fragment = new ScanFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new ScanFragment()).commit();
+                        fragment).commit();
                 break;
             case R.id.nav_ecg:
+                fragment = new EcgFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new EcgFragment()).commit();
+                        fragment).commit();
                 break;
             case R.id.nav_stats:
+//              if(fragment !=null)
+//                getSupportFragmentManager().beginTransaction().hide(fragment);
+                fragment = new StatsFragment();
+//
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new StatsFragment()).commit();
+                        fragment).commit();
+//                dbh = new DatabaseHelper(MainActivity.this);
+//                dbh.addText("hi ");
+//                Records r = new Records();
+//                r.a = dbh.getAllText();
+//                Intent intent = new Intent(MainActivity.this, Records.class);
+//                startActivity(intent);
                 break;
             default:
 //              Should not get here
