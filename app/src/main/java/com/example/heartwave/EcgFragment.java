@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,9 @@ import com.androidplot.xy.AdvancedLineAndPointRenderer;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,7 +50,6 @@ public class EcgFragment extends Fragment{
     Redrawer redrawer;
     private MyBroadcastReceiver receiver;
     double value = 0.0;
-    DatabaseHelper dbh;
     String time;
     private static final String FILE_NAME = "example.txt";
     @Nullable
@@ -250,5 +253,22 @@ public class EcgFragment extends Fragment{
         intentFilter.addAction(BleService.ACTION_SEND_DATA);
         receiver = new EcgFragment.MyBroadcastReceiver();
         requireActivity().registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        Log.d("Tag: ", event.message);
     }
 }

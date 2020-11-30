@@ -23,6 +23,9 @@ import androidx.fragment.app.Fragment;
 
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,6 +55,7 @@ public class StatsFragment extends Fragment{
         init(view);
         return view;
     }
+
     public void init(View view){
         records = view.findViewById(R.id.records);
         FileInputStream fis = null;
@@ -84,12 +88,14 @@ public class StatsFragment extends Fragment{
             }
         }
     }
+
     @Override
     public void onDetach() {
         super.onDetach();
         mMessageSenderCallback = null;
         requireActivity().unregisterReceiver(receiver);
     }
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -102,9 +108,11 @@ public class StatsFragment extends Fragment{
             Log.d("Error", "exception thrown");
         }
     }
+
     interface MessageSender {
         void sendMessage(int id, String address);
     }
+
     private class MyBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -132,8 +140,26 @@ public class StatsFragment extends Fragment{
         requireActivity().registerReceiver(receiver, intentFilter);
 
     }
+
     private void showToast(String msg) {
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        Log.d("Tag: ", event.message);
     }
 }
 //broadcaster stuff needed here too?

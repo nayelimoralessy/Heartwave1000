@@ -23,6 +23,9 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -50,8 +53,14 @@ public class BleService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        EventBus.getDefault().register(this);
         bleInit();
+    }
+
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 
     private void bleInit() {
@@ -210,5 +219,10 @@ public class BleService extends Service {
         } catch(NumberFormatException e){
             return false;
         }
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        Log.d("Tag: ", event.message);
     }
 }

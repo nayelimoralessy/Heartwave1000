@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList a;
     ArrayAdapter aad;
     ListView records;
-    DatabaseHelper dbh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

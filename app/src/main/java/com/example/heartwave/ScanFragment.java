@@ -22,6 +22,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -133,5 +136,22 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
         intentFilter.addAction(BleService.ACTION_SCAN_DEVICE);
         receiver = new MyBroadcastReceiver();
         requireActivity().registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        Log.d("Tag: ", event.message);
     }
 }
