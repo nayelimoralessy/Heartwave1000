@@ -73,6 +73,7 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
         switch(v.getId()) {
             case R.id.button_scan:
                 mMessageSenderCallback.sendMessage(R.id.button_scan, "");
+                EventBus.getDefault().post(new MessageEvent("Msg from scan fragment"));
                 break;
             case R.id.button_connect:
                 mMessageSenderCallback.sendMessage(R.id.button_connect, device.getAddress());

@@ -137,6 +137,7 @@ public class BleService extends Service {
         }, SCAN_PERIOD);
 
         bluetoothLeScanner.startScan(leScanCallback);
+        EventBus.getDefault().post(new MessageEvent("Msg from service"));
     }
 
     private ScanCallback leScanCallback = new ScanCallback() {

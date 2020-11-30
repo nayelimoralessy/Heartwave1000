@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -28,6 +29,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.google.android.material.navigation.NavigationView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
@@ -71,13 +75,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
         Intent intent = new Intent(this, BleService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
         unbindService(connection);
         boundService = false;
+        EventBus.getDefault().register(this);
+        super.onStop();
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        Log.d("Tag: ", event.message);
     }
 
     @Override
