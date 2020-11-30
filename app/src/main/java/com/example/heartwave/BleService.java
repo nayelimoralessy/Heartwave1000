@@ -137,7 +137,7 @@ public class BleService extends Service {
         }, SCAN_PERIOD);
 
         bluetoothLeScanner.startScan(leScanCallback);
-        EventBus.getDefault().post(new MessageEvent("Msg from service"));
+//        EventBus.getDefault().post(new MessageEvent("Msg from service"));
     }
 
     private ScanCallback leScanCallback = new ScanCallback() {
@@ -147,6 +147,9 @@ public class BleService extends Service {
 
             sendBroadcast(result.getDevice().getName() + "\n" +
                     result.getDevice().getAddress() + "\n" + result.getRssi() + " dBm", ACTION_SCAN_DEVICE);
+            String msg = result.getDevice().getName() + "\n" + result.getDevice().getName() + "\n"
+                    + result.getRssi() + " dBm";
+            EventBus.getDefault().post(new MessageEvent(msg, MessageEvent.File.SERVICE, MessageEvent.File.FRAGMENT_SCAN));
         }
     };
 
