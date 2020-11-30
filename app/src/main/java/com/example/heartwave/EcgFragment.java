@@ -84,18 +84,16 @@ public class EcgFragment extends Fragment{
         else {
             time = dateFormat.format(new Date()) + "PM\n";
         }
-//        StatsFragment stats = new StatsFragment();
-//        stats.add(time);
-//        dbh = new DatabaseHelper(getActivity());
-//        dbh.addText(" hi ");
         FileOutputStream fos = null;
-//        OutputStreamWriter fos = null;
         try {
-//            fos = new FileOutputStream(new File(FILE_NAME),true);//
-//            fos = new OutputStreamWriter(getActivity().openFileOutput(FILE_NAME, MODE_PRIVATE));
             fos = getActivity().openFileOutput(FILE_NAME, Context.MODE_APPEND);
-//            BufferedWriter fob = new BufferedWriter(fos);
-            fos.write(time.getBytes());//fob.write(time);
+            fos.write(time.getBytes());
+            String e = null;
+            if((ecgSeries.blipInterval>60)&(ecgSeries.blipInterval<100))
+                e = Integer.toString(ecgSeries.blipInterval) + " (Normal)\n";
+            else
+                e = Integer.toString(ecgSeries.blipInterval) + " (Irregular Activity)\n";
+            fos.write(e.getBytes());
             fos.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();

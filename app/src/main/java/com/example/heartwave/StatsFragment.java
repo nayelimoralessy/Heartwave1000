@@ -60,9 +60,12 @@ public class StatsFragment extends Fragment{
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader br = new BufferedReader(isr);
             a = new ArrayList();
-            String obtrecord;
-            while ((obtrecord= br.readLine()) != null) {
-                a.add(obtrecord);
+            String data, date = null;
+            for (int i=1;(data= br.readLine()) != null;i++) {
+                if((i%2) == 0)
+                    a.add(date + "\nHeart rate: " + data);
+                else
+                    date = data;
             }
             aad = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, a);
             records.setAdapter(aad);
