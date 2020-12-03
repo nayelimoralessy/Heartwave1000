@@ -30,7 +30,6 @@ import java.util.ArrayList;
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class ScanFragment extends Fragment implements View.OnClickListener {
     private MessageSender mMessageSenderCallback;
-    private MyBroadcastReceiver receiver;
     ListView listView;
     ArrayList<String> arrayList;
     ArrayAdapter<String> arrayAdapter;
@@ -73,7 +72,6 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
         switch(v.getId()) {
             case R.id.button_scan:
                 mMessageSenderCallback.sendMessage(R.id.button_scan, "");
-//                EventBus.getDefault().post(new MessageEvent("Msg from scan fragment"));
                 break;
             case R.id.button_connect:
                 mMessageSenderCallback.sendMessage(R.id.button_connect, device.getAddress());
@@ -104,39 +102,11 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
     public void onDetach() {
         super.onDetach();
         mMessageSenderCallback = null;
-        requireActivity().unregisterReceiver(receiver);
-    }
-
-    private class MyBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch(intent.getAction()) {
-                case BleService.ACTION_SCAN_DEVICE:
-                    Bundle extras = intent.getExtras();
-                    String state = extras.getString(BleService.EXTRA_DEVICE_BLE);
-//                    arrayList.add(state);
-//                    arrayAdapter.notifyDataSetChanged();
-                    String lines[] = state.split("\\r?\\n");
-                    if(!arrayDevices.contains(lines[1])) {
-                        arrayAdapter.add(state);
-                        arrayDevices.add(lines[1]);
-                    }
-                    break;
-                case BleService.ACTION_SEND_DATA:
-                    break;
-                default:
-            }
-        }
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BleService.ACTION_SCAN_DEVICE);
-        receiver = new MyBroadcastReceiver();
-        requireActivity().registerReceiver(receiver, intentFilter);
     }
 
     @Override
@@ -153,6 +123,22 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
 
     @Subscribe
     public void onMessageEvent(MessageEvent event) {
-        Log.d("Tag: ", event.message);
+        if(event.receiver.equals(MessageEvent.File.FRAGMENT_SCAN)) {
+            switch(event.action) {
+                case SCAN:
+                    String data = event.data;
+                    String[] lines = data.split("\\r?\\n");
+                    if(!arrayDevices.contains(lines[1])) {
+                        arrayAdapter.add(data);
+                        arrayDevices.add(lines[1]);
+                    }
+                    break;
+                case SAMPLE_RATE:
+                    // Do nothing
+                    break;
+                default:
+                    // Unhandled action
+            }
+        }
     }
 }

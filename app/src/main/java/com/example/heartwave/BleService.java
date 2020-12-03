@@ -31,10 +31,6 @@ import java.util.UUID;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class BleService extends Service {
-    final static String ACTION_SCAN_DEVICE = "com.example.heartwave.SCAN_DEVICE";
-    final static String ACTION_SEND_DATA = "com.example.heartwave.SEND_DATA";
-    final static String ACTION_SAMPLE_RATE = "com.example.heartwave.SAMPLE_RATE";
-    final static String EXTRA_DEVICE_BLE = "com.example.heartwave.KEY";
     private final IBinder binder = new LocalBinder();
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
@@ -71,27 +67,6 @@ public class BleService extends Service {
         if(bluetoothAdapter != null) {
             bluetoothAdapter.enable();
         }
-    }
-
-    /*  Rename - current function name conflicts with another */
-    private void sendBroadcast(String msg, String type) {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_DEVICE_BLE, msg);
-
-        switch(type) {
-            case ACTION_SCAN_DEVICE:
-                intent.setAction(ACTION_SCAN_DEVICE);
-                break;
-            case ACTION_SEND_DATA:
-                intent.setAction(ACTION_SEND_DATA);
-                break;
-            case ACTION_SAMPLE_RATE:
-                intent.setAction(ACTION_SAMPLE_RATE);
-            default:
-                break;
-        }
-
-        sendBroadcast(intent);
     }
 
     public BleService() {
@@ -137,19 +112,16 @@ public class BleService extends Service {
         }, SCAN_PERIOD);
 
         bluetoothLeScanner.startScan(leScanCallback);
-//        EventBus.getDefault().post(new MessageEvent("Msg from service"));
     }
 
     private ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-
-            sendBroadcast(result.getDevice().getName() + "\n" +
-                    result.getDevice().getAddress() + "\n" + result.getRssi() + " dBm", ACTION_SCAN_DEVICE);
-            String msg = result.getDevice().getName() + "\n" + result.getDevice().getName() + "\n"
+            String msg = result.getDevice().getName() + "\n" + result.getDevice().getAddress() + "\n"
                     + result.getRssi() + " dBm";
-            EventBus.getDefault().post(new MessageEvent(msg, MessageEvent.File.SERVICE, MessageEvent.File.FRAGMENT_SCAN));
+            EventBus.getDefault().post(new MessageEvent(msg, MessageEvent.File.SERVICE,
+                    MessageEvent.File.FRAGMENT_SCAN, MessageEvent.Action.SCAN));
         }
     };
 
@@ -197,7 +169,8 @@ public class BleService extends Service {
             String msg = new String(buffer);
             msg = msg.replaceAll("\\r\\n", "");
             if(isNumeric(msg)) {
-                sendBroadcast(msg, ACTION_SEND_DATA);
+                EventBus.getDefault().post(new MessageEvent(msg, MessageEvent.File.SERVICE,
+                        MessageEvent.File.FRAGMENT_ECG, MessageEvent.Action.ADC));
             }
 
             if(counter == 0) {
@@ -211,7 +184,9 @@ public class BleService extends Service {
             counter++;
             if(counter % 1000 == 0) {
                 double rate = ((double) counter) / ((double) difference);
-                sendBroadcast(String.valueOf(rate), ACTION_SAMPLE_RATE);
+                String dataRate = String.valueOf(rate);
+                EventBus.getDefault().post(new MessageEvent(dataRate, MessageEvent.File.SERVICE,
+                        MessageEvent.File.FRAGMENT_STATS, MessageEvent.Action.SAMPLE_RATE));
             }
         }
     };
@@ -227,6 +202,6 @@ public class BleService extends Service {
 
     @Subscribe
     public void onMessageEvent(MessageEvent event) {
-        Log.d("Tag: ", event.message);
+        Log.d("Tag: ", event.data);
     }
 }

@@ -48,10 +48,10 @@ import static android.content.Context.MODE_PRIVATE;
 public class EcgFragment extends Fragment{
     XYPlot plot;
     Redrawer redrawer;
-    private MyBroadcastReceiver receiver;
     double value = 0.0;
     String time;
     private static final String FILE_NAME = "example.txt";
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -112,7 +112,6 @@ public class EcgFragment extends Fragment{
             }
         }
     }
-
 
     public static class MyFadeFormatter extends AdvancedLineAndPointRenderer.Formatter {
 
@@ -230,29 +229,9 @@ public class EcgFragment extends Fragment{
         }
     }
 
-    private class MyBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch(intent.getAction()) {
-                case BleService.ACTION_SCAN_DEVICE:
-                    break;
-                case BleService.ACTION_SEND_DATA:
-                    Bundle extras = intent.getExtras();
-                    String state = extras.getString(BleService.EXTRA_DEVICE_BLE);
-                    value = Double.parseDouble(state);
-                    break;
-                default:
-            }
-        }
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BleService.ACTION_SEND_DATA);
-        receiver = new EcgFragment.MyBroadcastReceiver();
-        requireActivity().registerReceiver(receiver, intentFilter);
     }
 
     @Override
@@ -269,6 +248,21 @@ public class EcgFragment extends Fragment{
 
     @Subscribe
     public void onMessageEvent(MessageEvent event) {
-        Log.d("Tag: ", event.message);
+        if(event.receiver.equals(MessageEvent.File.FRAGMENT_ECG)) {
+            switch(event.action) {
+                case SCAN:
+                    // Do nothing
+                    break;
+                case SAMPLE_RATE:
+                    // Do nothing
+                    break;
+                case ADC:
+                    String data = event.data;
+                    value = Double.parseDouble(data);
+                    break;
+                default:
+                    // Unhandled action
+            }
+        }
     }
 }

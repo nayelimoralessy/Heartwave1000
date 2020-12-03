@@ -1,15 +1,5 @@
 package com.example.heartwave;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -23,17 +13,20 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ListView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.navigation.NavigationView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ScanFragment.MessageSender {
@@ -41,9 +34,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     BleService bleService;
     Boolean boundService;
     Fragment fragment ;
-    ArrayList a;
-    ArrayAdapter aad;
-    ListView records;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,27 +61,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Intent intent = new Intent(this, BleService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        unbindService(connection);
-        boundService = false;
-        EventBus.getDefault().register(this);
-        super.onStop();
-    }
-
-    @Subscribe
-    public void onMessageEvent(MessageEvent event) {
-        Log.d("Tag: ", event.message);
-    }
-
-    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
@@ -106,18 +75,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         fragment).commit();
                 break;
             case R.id.nav_stats:
-//              if(fragment !=null)
-//                getSupportFragmentManager().beginTransaction().hide(fragment);
                 fragment = new StatsFragment();
-//
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         fragment).commit();
-//                dbh = new DatabaseHelper(MainActivity.this);
-//                dbh.addText("hi ");
-//                Records r = new Records();
-//                r.a = dbh.getAllText();
-//                Intent intent = new Intent(MainActivity.this, Records.class);
-//                startActivity(intent);
                 break;
             default:
 //              Should not get here
@@ -176,5 +136,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 builder.show();
             }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+        Intent intent = new Intent(this, BleService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().register(this);
+        unbindService(connection);
+        boundService = false;
+        super.onStop();
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        Log.d("Tag: ", event.data);
     }
 }

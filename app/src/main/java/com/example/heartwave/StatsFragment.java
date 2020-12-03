@@ -39,7 +39,6 @@ import static android.content.Context.MODE_PRIVATE;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class StatsFragment extends Fragment{
-    private MyBroadcastReceiver receiver;
     ArrayList a;
     ArrayAdapter aad;
     ListView records;
@@ -50,7 +49,6 @@ public class StatsFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stats, container, false);
-//        dbh = new DatabaseHelper(getActivity());
 
         init(view);
         return view;
@@ -93,7 +91,6 @@ public class StatsFragment extends Fragment{
     public void onDetach() {
         super.onDetach();
         mMessageSenderCallback = null;
-        requireActivity().unregisterReceiver(receiver);
     }
 
     @Override
@@ -113,32 +110,9 @@ public class StatsFragment extends Fragment{
         void sendMessage(int id, String address);
     }
 
-    private class MyBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch(intent.getAction()) {
-                case BleService.ACTION_SCAN_DEVICE:
-                    break;
-                case BleService.ACTION_SEND_DATA:
-                    break;
-                case BleService.ACTION_SAMPLE_RATE:
-                    Bundle extras = intent.getExtras();
-                    String state = extras.getString(BleService.EXTRA_DEVICE_BLE);
-//                    textView.setText(state);
-                    break;
-                default:
-            }
-        }
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BleService.ACTION_SAMPLE_RATE);
-        receiver = new MyBroadcastReceiver();
-        requireActivity().registerReceiver(receiver, intentFilter);
-
     }
 
     private void showToast(String msg) {
@@ -159,7 +133,19 @@ public class StatsFragment extends Fragment{
 
     @Subscribe
     public void onMessageEvent(MessageEvent event) {
-        Log.d("Tag: ", event.message);
+        if(event.receiver.equals(MessageEvent.File.FRAGMENT_STATS)) {
+            switch(event.action) {
+                case SCAN:
+                    // Do nothing
+                    break;
+                case SAMPLE_RATE:
+                    // Add try-catch block
+                    double sampleRate = Double.parseDouble(event.data);
+                    break;
+                default:
+                    // Unhandled action
+            }
+        }
     }
 }
-//broadcaster stuff needed here too?
+//broadcaster stuff needed here too?no!
