@@ -12,6 +12,9 @@ public class MessageEvent {
         SCAN,
         SAMPLE_RATE,
         ADC,
+        BUTTON_SCAN,
+        BUTTON_CONNECT,
+        BUTTON_DISCONNECT,
     };
     public final String data; // Change to data
     public final File sender;

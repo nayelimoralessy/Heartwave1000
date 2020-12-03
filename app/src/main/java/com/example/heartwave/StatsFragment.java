@@ -42,7 +42,6 @@ public class StatsFragment extends Fragment{
     ArrayList a;
     ArrayAdapter aad;
     ListView records;
-    private StatsFragment.MessageSender mMessageSenderCallback;
     Context con;
     private static final String FILE_NAME = "example.txt";
 
@@ -90,7 +89,6 @@ public class StatsFragment extends Fragment{
     @Override
     public void onDetach() {
         super.onDetach();
-        mMessageSenderCallback = null;
     }
 
     @Override
@@ -98,16 +96,11 @@ public class StatsFragment extends Fragment{
         super.onAttach(context);
         con = context;
         try {
-            //mMessageSenderCallback = (MessageSender) context;
             con = context;
         }
         catch (ClassCastException e) {
             Log.d("Error", "exception thrown");
         }
-    }
-
-    interface MessageSender {
-        void sendMessage(int id, String address);
     }
 
     @Override

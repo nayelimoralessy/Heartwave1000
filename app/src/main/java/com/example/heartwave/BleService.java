@@ -19,7 +19,9 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -36,6 +38,9 @@ public class BleService extends Service {
     BluetoothAdapter bluetoothAdapter;
     BluetoothLeScanner bluetoothLeScanner;
     BluetoothGatt bluetoothGatt;
+    Toast toast;
+    Boolean isConnected;
+    Boolean isNotified;
 
     byte lowByte, highByte;
     int levelADC;
@@ -60,6 +65,8 @@ public class BleService extends Service {
     }
 
     private void bleInit() {
+        isConnected = false;
+        isNotified = false;
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
@@ -75,21 +82,6 @@ public class BleService extends Service {
     public class LocalBinder extends Binder {
         BleService getService() {
             return BleService.this;
-        }
-    }
-
-    public void sendMessage(int id, String address){
-        switch(id) {
-            case R.id.button_scan:
-                scanBleDevices();
-                break;
-            case R.id.button_connect:
-                connectToGatt(address);
-                break;
-            case R.id.button_disconnect:
-                Log.d("tag", String.valueOf(id));
-                break;
-            default:
         }
     }
 
@@ -126,9 +118,24 @@ public class BleService extends Service {
     };
 
     private void connectToGatt(String address) {
-        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-        bluetoothLeScanner.stopScan(leScanCallback);
-        bluetoothGatt = device.connectGatt(this, false, gattCallback);
+        if(isConnected) {
+            showToast("Device is already connected");
+        }
+        else {
+            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+            bluetoothLeScanner.stopScan(leScanCallback);
+            bluetoothGatt = device.connectGatt(this, false, gattCallback);
+            showToast("Connecting...");
+        }
+    }
+
+    private void disconnectFromGatt() {
+        if(isConnected) {
+            bluetoothGatt.disconnect();
+        }
+        else {
+            showToast("Device is not connected");
+        }
     }
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
@@ -137,8 +144,37 @@ public class BleService extends Service {
             super.onConnectionStateChange(gatt, status, newState);
 
             if(newState == BluetoothProfile.STATE_CONNECTED) {
-                if(status == BluetoothGatt.GATT_SUCCESS) {
+                switch(status) {
+                    case BluetoothGatt.GATT_SUCCESS:
+                        isConnected = true;
+                        showToast("Connected");
                         gatt.discoverServices();
+                        break;
+                    case BluetoothGatt.GATT_FAILURE:
+                        isConnected = true;
+                        showToast("Failed to connect");
+                        break;
+                    default:
+                        isConnected = true;
+                        showToast("Error trying to connect");
+                }
+            }
+            else if(newState == BluetoothProfile.STATE_DISCONNECTED) {
+                switch(status) {
+                    case BluetoothGatt.GATT_SUCCESS:
+                        isConnected = false;
+                        isNotified = false;
+                        showToast("Disconnected");
+                        break;
+                    case BluetoothGatt.GATT_FAILURE:
+                        isConnected = false;
+                        isNotified = false;
+                        showToast("Failed to disconnect");
+                        break;
+                    default:
+                        isConnected = false;
+                        isNotified = false;
+                        showToast("Error trying to disconnect");
                 }
             }
         }
@@ -162,12 +198,15 @@ public class BleService extends Service {
             }
 
             if(status == BluetoothGatt.GATT_SUCCESS) {
-                BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                BluetoothGattCharacteristic characteristic = service.getCharacteristic(CHARACTERISTIC_UUID);
-                gatt.setCharacteristicNotification(characteristic, true);
-                BluetoothGattDescriptor descriptor = characteristic.getDescriptor(DESCRIPTOR_UUID);
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                gatt.writeDescriptor(descriptor);
+                if(!isNotified) {
+                    isNotified = true;
+                    BluetoothGattService service = gatt.getService(SERVICE_UUID);
+                    BluetoothGattCharacteristic characteristic = service.getCharacteristic(CHARACTERISTIC_UUID);
+                    gatt.setCharacteristicNotification(characteristic, true);
+                    BluetoothGattDescriptor descriptor = characteristic.getDescriptor(DESCRIPTOR_UUID);
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    gatt.writeDescriptor(descriptor);
+                }
             }
         }
 
@@ -211,8 +250,37 @@ public class BleService extends Service {
         }
     }
 
+    public void showToast(final String msg) {
+        final Context MyContext = this;
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                if(toast != null) {
+                    toast.cancel();
+                }
+                toast = Toast.makeText(MyContext, msg, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
+    }
+
     @Subscribe
     public void onMessageEvent(MessageEvent event) {
-        Log.d("Tag: ", event.data);
+        if(event.receiver.equals(MessageEvent.File.SERVICE)) {
+            switch(event.action) {
+                case BUTTON_SCAN:
+                    scanBleDevices();
+                    break;
+                case BUTTON_CONNECT:
+                    connectToGatt(event.data);
+                    break;
+                case BUTTON_DISCONNECT:
+                    disconnectFromGatt();
+                    break;
+                default:
+                    // Do nothing
+            }
+        }
     }
 }

@@ -29,7 +29,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ScanFragment.MessageSender {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout drawer;
     BleService bleService;
     Boolean boundService;
@@ -111,11 +111,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             boundService = false;
         }
     };
-
-    @Override
-    public void sendMessage(int id, String address) {
-        bleService.sendMessage(id, address);
-    }
 
     private void askPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

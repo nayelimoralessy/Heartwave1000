@@ -29,7 +29,6 @@ import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class ScanFragment extends Fragment implements View.OnClickListener {
-    private MessageSender mMessageSenderCallback;
     ListView listView;
     ArrayList<String> arrayList;
     ArrayAdapter<String> arrayAdapter;
@@ -69,39 +68,37 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+//        switch(v.getId()) {
+//            case R.id.button_scan:
+//                mMessageSenderCallback.sendMessage(R.id.button_scan, "");
+//                break;
+//            case R.id.button_connect:
+//                mMessageSenderCallback.sendMessage(R.id.button_connect, device.getAddress());
+//                break;
+//            case R.id.button_disconnect:
+//                mMessageSenderCallback.sendMessage(R.id.button_disconnect, "");
+//                break;
+//            default:
+//        }
         switch(v.getId()) {
             case R.id.button_scan:
-                mMessageSenderCallback.sendMessage(R.id.button_scan, "");
+                EventBus.getDefault().post(new MessageEvent("SCAN",
+                        MessageEvent.File.FRAGMENT_SCAN, MessageEvent.File.SERVICE,
+                        MessageEvent.Action.BUTTON_SCAN));
                 break;
             case R.id.button_connect:
-                mMessageSenderCallback.sendMessage(R.id.button_connect, device.getAddress());
+                EventBus.getDefault().post(new MessageEvent(device.getAddress(),
+                        MessageEvent.File.FRAGMENT_SCAN, MessageEvent.File.SERVICE,
+                        MessageEvent.Action.BUTTON_CONNECT));
                 break;
             case R.id.button_disconnect:
-                mMessageSenderCallback.sendMessage(R.id.button_disconnect, "");
+                EventBus.getDefault().post(new MessageEvent("DISCONNECT",
+                        MessageEvent.File.FRAGMENT_SCAN, MessageEvent.File.SERVICE,
+                        MessageEvent.Action.BUTTON_DISCONNECT));
                 break;
             default:
+                // Do nothing
         }
-    }
-
-    interface MessageSender {
-        void sendMessage(int id, String address);
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        try {
-            mMessageSenderCallback = (MessageSender) context;
-        } catch (ClassCastException e) {
-            Log.d("Error", "exception thrown");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mMessageSenderCallback = null;
     }
 
     @Override
