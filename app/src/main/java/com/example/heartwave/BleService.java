@@ -146,9 +146,20 @@ public class BleService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
-            UUID SERVICE_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
-            UUID CHARACTERISTIC_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
-            UUID DESCRIPTOR_UUID = UUID.fromString("00002901-0000-1000-8000-00805F9B34FB");
+            UUID SERVICE_UUID = UUID.randomUUID();
+            UUID CHARACTERISTIC_UUID = UUID.randomUUID();
+            UUID DESCRIPTOR_UUID = UUID.randomUUID();
+
+            if(bluetoothGatt.getDevice().getAddress().equals("04:91:62:9F:94:83")) {    // RN4870
+                SERVICE_UUID = UUID.fromString("49535343-FE7D-4AE5-8FA9-9FAFD205E455");
+                CHARACTERISTIC_UUID = UUID.fromString("49535343-1E4D-4BD9-BA61-23C647249616");
+                DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
+            }
+            else if(bluetoothGatt.getDevice().getAddress().equals("A4:DA:32:52:20:6E")) { // HM-19
+                SERVICE_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
+                CHARACTERISTIC_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
+                DESCRIPTOR_UUID = UUID.fromString("00002901-0000-1000-8000-00805F9B34FB");
+            }
 
             if(status == BluetoothGatt.GATT_SUCCESS) {
                 BluetoothGattService service = gatt.getService(SERVICE_UUID);
