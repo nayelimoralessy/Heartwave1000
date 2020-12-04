@@ -104,6 +104,7 @@ public class BleService extends Service {
         }, SCAN_PERIOD);
 
         bluetoothLeScanner.startScan(leScanCallback);
+        showToast("Scanning...");
     }
 
     private ScanCallback leScanCallback = new ScanCallback() {
@@ -216,13 +217,13 @@ public class BleService extends Service {
 
             byte[] buffer = characteristic.getValue();
 
-            String msg = new String(buffer);
-            msg = msg.replaceAll("\\r\\n", "");
-            if(isNumeric(msg)) {
-                EventBus.getDefault().post(new MessageEvent(msg, MessageEvent.File.SERVICE,
-                        MessageEvent.File.FRAGMENT_ECG, MessageEvent.Action.ADC));
+            if(bluetoothGatt.getDevice().getAddress().equals("04:91:62:9F:94:83")) {    // RN4870
+                processDataRn4870(buffer);
             }
-
+            else if(bluetoothGatt.getDevice().getAddress().equals("A4:DA:32:52:20:6E")) {   // HM-19
+                processDataHm19(buffer);
+            }
+            
             if(counter == 0) {
                 startTimestamp = System.currentTimeMillis() / 1000;
             }
@@ -247,6 +248,37 @@ public class BleService extends Service {
             return true;
         } catch(NumberFormatException e){
             return false;
+        }
+    }
+
+    private void processDataHm19(byte[] buffer) {
+        String msg = new String(buffer);
+        msg = msg.replaceAll("\\r\\n", "");
+
+        if(isNumeric(msg)) {
+            EventBus.getDefault().post(new MessageEvent(msg, MessageEvent.File.SERVICE,
+                    MessageEvent.File.FRAGMENT_ECG, MessageEvent.Action.ADC));
+        }
+    }
+
+    private void processDataRn4870(byte[] buffer) {
+        byte register = buffer[0];
+        byte bit7 = (byte) ((register >> 7) & 0x01);
+        if(bit7 == 0x00) {
+            /*  Low Byte   */
+            lowByte = (byte) (register & 0x7F);
+        }
+        else {
+            /*  High Byte    */
+            lowByte |= (register & 0x01);
+            highByte = (byte) ((register >> 1) & 0x03);
+            levelADC = ((highByte & 0xFF) << 8) | (lowByte & 0xFF);
+            voltageADC = levelADC * 3.3 / 1023;
+            String msg = String.valueOf(voltageADC);
+            if(isNumeric(msg)) {
+                EventBus.getDefault().post(new MessageEvent(msg, MessageEvent.File.SERVICE,
+                        MessageEvent.File.FRAGMENT_ECG, MessageEvent.Action.ADC));
+            }
         }
     }
 
