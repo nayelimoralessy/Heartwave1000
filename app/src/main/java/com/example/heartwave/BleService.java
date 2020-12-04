@@ -223,7 +223,7 @@ public class BleService extends Service {
             else if(bluetoothGatt.getDevice().getAddress().equals("A4:DA:32:52:20:6E")) {   // HM-19
                 processDataHm19(buffer);
             }
-            
+
             if(counter == 0) {
                 startTimestamp = System.currentTimeMillis() / 1000;
             }
