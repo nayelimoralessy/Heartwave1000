@@ -1,55 +1,49 @@
 package com.example.heartwave;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-
 import com.androidplot.util.Redrawer;
 import com.androidplot.xy.AdvancedLineAndPointRenderer;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-
-import static android.content.Context.MODE_PRIVATE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class EcgFragment extends Fragment{
     XYPlot plot;
     Redrawer redrawer;
     double value = 0.0;
-    String time;
+    String time,e;
+    Button start, save;
+    String sec1, min1, sec2, min2;
+    int flag, heartbeat, heartrate = 0;
+    SimpleDateFormat second1, minute1, second2, minute2;
+    ECGModel ecgSeries;
+    MyFadeFormatter formatter;
+    int m1, m2, s1, s2;
     private static final String FILE_NAME = "example.txt";
 
     @Nullable
@@ -62,55 +56,102 @@ public class EcgFragment extends Fragment{
 
     private void initialize(View view) {
         plot = view.findViewById(R.id.plot);
-
-        ECGModel ecgSeries = new ECGModel(1000, 100);
-
-        // add a new series' to the XYPlot:
-        MyFadeFormatter formatter = new MyFadeFormatter(1000);
-        formatter.setLegendIconEnabled(false);
-        plot.addSeries(ecgSeries, formatter);
+        start = view.findViewById(R.id.start);
+        save = view.findViewById(R.id.save);
         plot.setRangeBoundaries(-1, 5, BoundaryMode.FIXED);
         plot.setDomainBoundaries(0, 1000, BoundaryMode.FIXED);
         // reduce the number of range labels
         plot.setLinesPerRangeLabel(3);
-        // start generating ecg data in the background:
-        ecgSeries.start(new WeakReference<>(plot.getRenderer(AdvancedLineAndPointRenderer.class)));
-        // set a redraw rate of 30hz and start immediately:
-        redrawer = new Redrawer(plot, 10, true);
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm");
-        Calendar calendar = Calendar.getInstance();
-        int t = calendar.get(Calendar.AM_PM);
-        if(t == Calendar.AM) {
-            time = dateFormat.format(new Date()) + "AM\n";
-        }
-        else {
-            time = dateFormat.format(new Date()) + "PM\n";
-        }
-        FileOutputStream fos = null;
-        try {
-            fos = getActivity().openFileOutput(FILE_NAME, Context.MODE_APPEND);
-            fos.write(time.getBytes());
-            String e = null;
-            if((ecgSeries.blipInterval>60)&(ecgSeries.blipInterval<100))
-                e = Integer.toString(ecgSeries.blipInterval) + " (Normal)\n";
-            else
-                e = Integer.toString(ecgSeries.blipInterval) + " (Irregular Activity)\n";
-            fos.write(e.getBytes());
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        ecgSeries = new ECGModel(1000, 100);
+        formatter = new MyFadeFormatter(1000);
+        start.setVisibility(VISIBLE);
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                start.setVisibility(INVISIBLE);
+                formatter.setLegendIconEnabled(false);
+                // add a new series' to the XYPlot:
+                plot.addSeries(ecgSeries, formatter);
+                // start generating ecg data in the background:
+                ecgSeries.start(new WeakReference<>(plot.getRenderer(AdvancedLineAndPointRenderer.class)));
+                // set a redraw rate of 30hz and start immediately:
+                redrawer = new Redrawer(plot, 10, true);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm");
+                Calendar calendar = Calendar.getInstance();
+                int t = calendar.get(Calendar.AM_PM);
+                if(t == Calendar.AM) {
+                    time = dateFormat.format(new Date()) + "AM\n";
+                }
+                else {
+                    time = dateFormat.format(new Date()) + "PM\n";
+                }
+                minute1 = new SimpleDateFormat("mm");
+                second1 = new SimpleDateFormat("ss");
+                min1 = minute1.format(new Date());
+                sec1 = second1.format(new Date());
+                m1 = Integer.parseInt(min1);
+                s1 = Integer.parseInt(sec1);
+                if ((value > 2)&&(flag == 0)){
+                    heartbeat++;
+                    flag = 1;
+                } //change 2 to 1.5
+                else if((value < 2)&&(flag == 1))
+                    flag = 0;
+            }
+        });
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FileOutputStream fos = null;
+                int dif;
+                if ((minute1 == null) || (second1 == null)) showToast("There is nothing to save.");
+                else{
+                    minute2 = new SimpleDateFormat("mm");
+                    second2 = new SimpleDateFormat("ss");
+                    min2 = minute2.format(new Date());
+                    sec2 = second2.format(new Date());
+                    m2 = Integer.parseInt(min2);
+                    s2 = Integer.parseInt(sec2);
+                    if ((m2 > m1) && (s2 >= s1)) dif = (60 * (m2 - m1)) + (s2 - s1);
+                    else if ((m2 > m1) && (s2 < s1)) dif = ((60 * (m2 - m1)) - s1) + s2;
+                    else dif = s2 - s1;
+                    if (dif < 1) dif = 1;
+                    heartrate = (heartbeat / dif) * 60;
+                    if ((heartrate > 60) && (heartrate < 100))
+                        e = heartrate + " (Normal)\n";
+                    else
+                        e = heartrate + " (Irregular Activity)\n";
+                    if (e != null) {
+                        try {
+                            fos = getActivity().openFileOutput(FILE_NAME, Context.MODE_APPEND);
+                            fos.write(time.getBytes());
+                            fos.write(e.getBytes());
+                            //showToast("Saved to records.");
+                            showToast("Time used" + dif + "s");
+                            fos.close();
+                            plot.removeSeries(ecgSeries);
+                            heartbeat = 0;
+                            flag = 0;
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (fos != null) {
+                                try {
+                                    fos.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    } else showToast("There is nothing to save.");
                 }
             }
-        }
+        });
+    }
+    private void showToast(String msg) {
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
     }
 
     public static class MyFadeFormatter extends AdvancedLineAndPointRenderer.Formatter {
