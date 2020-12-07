@@ -20,7 +20,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -28,7 +27,6 @@ import androidx.annotation.RequiresApi;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.nio.ByteBuffer;
 import java.util.UUID;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -123,10 +121,15 @@ public class BleService extends Service {
             showToast("Device is already connected");
         }
         else {
-            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-            bluetoothLeScanner.stopScan(leScanCallback);
-            bluetoothGatt = device.connectGatt(this, false, gattCallback);
-            showToast("Connecting...");
+            if(!address.isEmpty()) {
+                BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+                bluetoothLeScanner.stopScan(leScanCallback);
+                bluetoothGatt = device.connectGatt(this, false, gattCallback);
+                showToast("Connecting...");
+            }
+            else {
+                showToast("No device selected");
+            }
         }
     }
 
@@ -218,7 +221,8 @@ public class BleService extends Service {
             byte[] buffer = characteristic.getValue();
 
             if(bluetoothGatt.getDevice().getAddress().equals("04:91:62:9F:94:83")) {    // RN4870
-                processDataRn4870(buffer);
+//                processDataRn4870(buffer);
+                processDataHm19(buffer); // Testing purposes
             }
             else if(bluetoothGatt.getDevice().getAddress().equals("A4:DA:32:52:20:6E")) {   // HM-19
                 processDataHm19(buffer);

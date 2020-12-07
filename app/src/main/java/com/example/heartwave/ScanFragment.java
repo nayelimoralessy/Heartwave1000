@@ -2,13 +2,8 @@ package com.example.heartwave;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +25,6 @@ import java.util.ArrayList;
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class ScanFragment extends Fragment implements View.OnClickListener {
     ListView listView;
-    ArrayList<String> arrayList;
     ArrayAdapter<String> arrayAdapter;
     ArrayList<String> arrayDevices;
     BluetoothDevice device;
@@ -59,7 +53,7 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String nameAddress = arrayAdapter.getItem(position);
-                String lines[] = nameAddress.split("\\r?\\n");
+                String[] lines= nameAddress.split("\\r?\\n");
                 device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(lines[1]);
             }
         });
@@ -74,7 +68,8 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
                         MessageEvent.Action.BUTTON_SCAN));
                 break;
             case R.id.button_connect:
-                EventBus.getDefault().post(new MessageEvent(device.getAddress(),
+                String address = (device != null) ? device.getAddress() : "";
+                EventBus.getDefault().post(new MessageEvent(address,
                         MessageEvent.File.FRAGMENT_SCAN, MessageEvent.File.SERVICE,
                         MessageEvent.Action.BUTTON_CONNECT));
                 break;
