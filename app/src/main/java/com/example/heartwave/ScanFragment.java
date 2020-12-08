@@ -40,14 +40,12 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
     private void initialize(View view) {
         Button scanButton = view.findViewById(R.id.button_scan);
         Button connectButton = view.findViewById(R.id.button_connect);
-        Button disconnectButton = view.findViewById(R.id.button_disconnect);
         listView = view.findViewById(R.id.list_view);
         arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
         listView.setAdapter(arrayAdapter);
         arrayDevices = new ArrayList<>();
         scanButton.setOnClickListener(this);
         connectButton.setOnClickListener(this);
-        disconnectButton.setOnClickListener(this);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -72,11 +70,6 @@ public class ScanFragment extends Fragment implements View.OnClickListener {
                 EventBus.getDefault().post(new MessageEvent(address,
                         MessageEvent.File.FRAGMENT_SCAN, MessageEvent.File.SERVICE,
                         MessageEvent.Action.BUTTON_CONNECT));
-                break;
-            case R.id.button_disconnect:
-                EventBus.getDefault().post(new MessageEvent("DISCONNECT",
-                        MessageEvent.File.FRAGMENT_SCAN, MessageEvent.File.SERVICE,
-                        MessageEvent.Action.BUTTON_DISCONNECT));
                 break;
             default:
                 // Do nothing
