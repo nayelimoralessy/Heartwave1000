@@ -81,11 +81,11 @@ public class EcgFragment extends Fragment{
         start = view.findViewById(R.id.start);
         save = view.findViewById(R.id.save);
         plot.setRangeBoundaries(-1, 5, BoundaryMode.FIXED);
-        plot.setDomainBoundaries(0, 1000, BoundaryMode.FIXED);
+        plot.setDomainBoundaries(0, 500, BoundaryMode.FIXED);// upperBoundary:1000
         // reduce the number of range labels
         plot.setLinesPerRangeLabel(3);
-        ecgSeries = new ECGModel(1000, 100);
-        formatter = new MyFadeFormatter(1000);
+        ecgSeries = new ECGModel(500, 50); // size:1000 updateFreqHz=100
+        formatter = new MyFadeFormatter(500); // trailsize:1000
         start.setVisibility(VISIBLE);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,7 +98,7 @@ public class EcgFragment extends Fragment{
                 // start generating ecg data in the background:
                 ecgSeries.start(new WeakReference<>(plot.getRenderer(AdvancedLineAndPointRenderer.class)));
                 // set a redraw rate of 30hz and start immediately:
-                redrawer = new Redrawer(plot, 10, true);
+                redrawer = new Redrawer(plot, 15, true); // maxrefreshrate=10
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm");
                 Calendar calendar = Calendar.getInstance();
                 int t = calendar.get(Calendar.AM_PM);
@@ -143,7 +143,7 @@ public class EcgFragment extends Fragment{
 //                else dif = s2-s1;
 //                if(dif<1) dif = 1;
 //                heartrate = (heartbeat*60)/dif;
-                if ((heartrate >= 60) && (heartrate <= 100))
+                if ((heartrate >= 54) && (heartrate <= 100))
                     e = ((int) (heartrate)) + " (Normal)\n";
                 else
                     e = ((int) (heartrate)) + " (Irregular Activity)\n";
@@ -211,7 +211,6 @@ public class EcgFragment extends Fragment{
 
         private final Number[] data;
         private final long delayMs;
-        private final int blipInterval;
         private final Thread thread;
         private boolean keepRunning;
         private int latestIndex;
@@ -230,31 +229,42 @@ public class EcgFragment extends Fragment{
             // translate hz into delay (ms):
             delayMs = 1000 / updateFreqHz;
 
-            blipInterval = size / 7;
-
             thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         while (keepRunning) {
                             if (latestIndex >= data.length) {
+                                double [] max = new double[12];
+                                for(int i = 0; i < data.length; i++) {
+                                    for(int j = 0; j < max.length; j++){
+                                        if(Double.compare(max[j], data[i].doubleValue()) < 0) {
+                                            max[j] = data[i].doubleValue();
+                                        }
+                                    }
+                                }
+                                for(int i = 0; i < max.length; i++) {
+                                    if(max[i] > 2.3) {
+                                        heartbeat++;
+                                    }
+                                }
                                 latestIndex = 0;
                             }
 
                             // generate some random data:
                             data[latestIndex] = value;
-                            if((value > 3) && (flag == 0)) {
-                                heartbeat++;
-                                flag = 1;
-                            }
-                            else if((value < 3) && (flag == 1)){
-                                flag = 0;
-                            }
-                            if(latestIndex < data.length - 1) {
-                                // null out the point immediately following i, to disable
-                                // connecting i and i+1 with a line:
-                                data[latestIndex +1] = null;
-                            }
+//                            if((value > 2.5) && (flag == 0)) {
+//                                heartbeat++;
+//                                flag = 1;
+//                            }
+//                            else if((value <= 2.5) && (flag == 1)){
+//                                flag = 0;
+//                            }
+//                            if(latestIndex < data.length - 1) {
+//                                // null out the point immediately following i, to disable
+//                                // connecting i and i+1 with a line:
+//                                data[latestIndex +1] = null;
+//                            }
 
                             if(rendererRef.get() != null) {
                                 rendererRef.get().setLatestIndex(latestIndex);

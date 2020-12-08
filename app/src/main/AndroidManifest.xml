@@ -21,6 +21,8 @@
             android:enabled="true"
             android:exported="true" />
 
+        <activity android:name=".MainActivity" />
+
         <activity
             android:name=".Home"
             android:theme="@style/Theme.AppCompat.NoActionBar">
@@ -31,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainActivity" />
+
     </application>
 
 </manifest>
