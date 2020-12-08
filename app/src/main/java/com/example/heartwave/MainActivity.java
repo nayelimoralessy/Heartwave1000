@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(savedInstanceState == null) {
             fragment =  new ScanFragment();
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                   fragment).commit();
+                    fragment).commit();
             navigationView.setCheckedItem(R.id.nav_scan);
         }
         askPermission();

@@ -15,5 +15,6 @@
     <string name="button_scan">scan</string>
     <string name="button_connect">connect</string>
     <string name="button_disconnect">disconnect</string>
+    <string name="heartwave">HeartWave</string>
 
 </resources>
