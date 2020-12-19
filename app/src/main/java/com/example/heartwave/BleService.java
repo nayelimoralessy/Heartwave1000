@@ -91,7 +91,7 @@ public class BleService extends Service {
     public void scanBleDevices() {
         Handler handler = new Handler();
         final long SCAN_PERIOD = 15000;
-        bluetoothLeScanner.stopScan(leScanCallback);
+//        bluetoothLeScanner.stopScan(leScanCallback);
         bluetoothLeScanner.stopScan(leScanCallback);
 
         handler.postDelayed(new Runnable() {
@@ -242,6 +242,7 @@ public class BleService extends Service {
                 String dataRate = String.valueOf(rate);
                 EventBus.getDefault().post(new MessageEvent(dataRate, MessageEvent.File.SERVICE,
                         MessageEvent.File.FRAGMENT_STATS, MessageEvent.Action.SAMPLE_RATE));
+                counter = 0;
             }
         }
     };
